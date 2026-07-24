@@ -1,0 +1,40 @@
+name: Run MATLAB Stage 1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  stage1:
+    name: Validate data-driven error envelope
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Extract MATLAB project
+        run: unzip -q matlab_multiagent_rcis_stage1.zip
+
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v3
+
+      - name: Run Stage 1
+        uses: matlab-actions/run-command@v3
+        with:
+          command: cd('matlab_multiagent_rcis_stage1'); run_stage1_data_validation
+
+      - name: Upload MATLAB results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matlab-stage1-results
+          path: matlab_multiagent_rcis_stage1/results/**
+          if-no-files-found: warn
+          retention-days: 1
