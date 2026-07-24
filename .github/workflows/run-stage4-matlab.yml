@@ -1,0 +1,29 @@
+name: Run MATLAB Stage 4
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage4:
+    name: Run coupled robustness Monte Carlo
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract Stage 4 package
+        run: unzip -q matlab_multiagent_rcis_stage4.zip
+      - uses: matlab-actions/setup-matlab@v3
+      - uses: matlab-actions/run-command@v3
+        with:
+          command: cd matlab_multiagent_rcis_stage4; run_stage4_monte_carlo
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matlab-stage4-results
+          path: matlab_multiagent_rcis_stage4/results_stage4/**
+          if-no-files-found: warn
+          retention-days: 1
