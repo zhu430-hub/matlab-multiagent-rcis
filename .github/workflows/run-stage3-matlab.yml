@@ -1,0 +1,37 @@
+name: Run MATLAB Stage 3
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage3:
+    name: Verify offline lifted RCIS grid
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Extract Stage 3 project
+        run: unzip -q matlab_multiagent_rcis_stage3.zip
+
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v3
+
+      - name: Run Stage 3
+        uses: matlab-actions/run-command@v3
+        with:
+          command: cd matlab_multiagent_rcis_stage3; run_stage3_offline_rcis
+
+      - name: Upload MATLAB results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matlab-stage3-results
+          path: matlab_multiagent_rcis_stage3/results_stage3/**
+          if-no-files-found: warn
+          retention-days: 1
