@@ -1,0 +1,43 @@
+name: Run MATLAB Stage 2
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - matlab_multiagent_rcis_stage2.zip
+      - .github/workflows/run-stage2-matlab.yml
+
+permissions:
+  contents: read
+
+jobs:
+  stage2:
+    name: Validate distributed recursive feasibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Extract MATLAB project
+        run: unzip -q matlab_multiagent_rcis_stage2.zip
+
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v3
+
+      - name: Run Stage 2
+        uses: matlab-actions/run-command@v3
+        with:
+          command: cd('matlab_multiagent_rcis_stage2'); run_stage2_distributed_rcis
+
+      - name: Upload MATLAB results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matlab-stage2-results
+          path: matlab_multiagent_rcis_stage2/results_stage2/**
+          if-no-files-found: warn
+          retention-days: 1
